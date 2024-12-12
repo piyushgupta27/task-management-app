@@ -1,0 +1,38 @@
+# Python-related files
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.env
+
+# Django-specific files
+db.sqlite3
+*.log
+
+# Virtual environments
+venv/
+env/
+
+# IDE and Editor Directories
+.idea/
+.vscode/
+*.swp
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# Static and Media Files
+staticfiles/
+media/
+
+# Migration files
+migrations/
+!migrations/__init__.py
+
+# Coverage reports
+htmlcov/
+.coverage
+.tox/
+
+# Node.js (
