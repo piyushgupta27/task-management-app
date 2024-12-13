@@ -26,10 +26,6 @@ Thumbs.db
 staticfiles/
 media/
 
-# Migration files
-migrations/
-!migrations/__init__.py
-
 # Coverage reports
 htmlcov/
 .coverage
