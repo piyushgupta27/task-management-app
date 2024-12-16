@@ -1,12 +1,16 @@
 from django.contrib.auth.models import User
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, viewsets
+from rest_framework import filters, mixins, viewsets
 
 from .models import Task
 from .serializers import TaskSerializer, UserSerializer
 
 
-class UserViewSet(viewsets.ModelViewSet):
+class UserViewSet(
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet,
+):
     """
     A simple ViewSet for viewing and editing users.
     """
