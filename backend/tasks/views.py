@@ -1,7 +1,20 @@
-from rest_framework import viewsets, filters
+from django.contrib.auth.models import User
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters, viewsets
+
 from .models import Task
-from .serializers import TaskSerializer
+from .serializers import TaskSerializer, UserSerializer
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    """
+    A simple ViewSet for viewing and editing users.
+    """
+
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ["username", "email"]
 
 
 class TaskViewSet(viewsets.ModelViewSet):
