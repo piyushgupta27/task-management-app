@@ -1,8 +1,10 @@
 from django.contrib.auth.models import User
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, viewsets
+from rest_framework.permissions import IsAuthenticated
 
 from .models import Task
+from .permissions import IsOwnerOrReadOnly
 from .serializers import TaskSerializer, UserSerializer
 
 
@@ -48,3 +50,15 @@ class TaskViewSet(viewsets.ModelViewSet):
         "created_by",
         "updated_by",
     ]
+    permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user, updated_by=self.request.user)
+
+    def perform_update(self, serializer):
+        serializer.save(updated_by=self.request.user)
+
+    def perform_destroy(self, instance):
+        instance.is_deleted = True
+        instance.updated_by = self.request.user
+        instance.save()
