@@ -1,11 +1,14 @@
 from django.contrib.auth.models import User
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, viewsets
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
 from .models import Task
 from .permissions import IsOwnerOrReadOnly
 from .serializers import TaskSerializer, UserSerializer
+from .services import TaskService
 
 
 class UserViewSet(
@@ -62,3 +65,10 @@ class TaskViewSet(viewsets.ModelViewSet):
         instance.is_deleted = True
         instance.updated_by = self.request.user
         instance.save()
+
+    @action(detail=True, methods=["patch"], url_path="mark-completed")
+    def mark_completed(self, request, pk=None):
+        task = self.get_object()
+        task.updated_by = self.request.user
+        TaskService.mark_task_as_completed(task)
+        return Response({"message": "Task marked as completed."})
