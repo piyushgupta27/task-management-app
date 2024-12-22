@@ -1,24 +1,22 @@
 import React, { useEffect, useState } from "react";
-import TaskList from "../components/TaskList";
+import { Container, Typography, Box, Button } from "@mui/material";
 import { fetchTasks } from "../services/api/apiClient";
-import NotFoundPage from "./NotFoundPage";
 
 const TaskPage = () => {
-  const [tasks, setTasks] = useState([]); // State to store tasks
-  const [error, setError] = useState(null); // State to handle errors
-  const [loading, setLoading] = useState(true); // State to handle loading
+  const [tasks, setTasks] = useState([]);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch tasks on component mount
     const getTasks = async () => {
       try {
         const taskData = await fetchTasks();
-        setTasks(taskData); // Save tasks in state
+        setTasks(taskData);
       } catch (err) {
         console.error("Error fetching tasks:", err);
         setError("Failed to fetch tasks.");
       } finally {
-        setLoading(false); // End loading state
+        setLoading(false);
       }
     };
 
@@ -34,10 +32,19 @@ const TaskPage = () => {
   }
 
   return (
-    <div>
-      <h2>Tasks</h2>
-      {(tasks === undefined || tasks.length === 0) ? <NotFoundPage /> : <TaskList tasks={tasks} />}
-    </div>
+    <Container maxWidth="sm">
+      <Typography variant="h4" gutterBottom>
+        Task List
+      </Typography>
+      <Button variant="contained" color="primary" sx={{ mb: 2 }}>
+        Add Task
+      </Button>
+      <Box>
+        {tasks.map((task) => (
+          <Typography key={task.id}>{task.title}</Typography>
+        ))}
+      </Box>
+    </Container>
   );
 };
 
