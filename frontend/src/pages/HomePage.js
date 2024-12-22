@@ -3,8 +3,8 @@ import { login } from "../services/api/apiClient";
 import { Container, Typography, TextField, Button, Box, Alert } from "@mui/material";
 
 const HomePage = () => {
-  const username = "john_doe";
-  const password = "securepassword";
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -35,6 +35,8 @@ const HomePage = () => {
           margin="normal"
           label="Username"
           variant="outlined"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
         />
         <TextField
           fullWidth
@@ -42,6 +44,8 @@ const HomePage = () => {
           label="Password"
           type="password"
           variant="outlined"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
         />
         <Button
           fullWidth
@@ -49,6 +53,7 @@ const HomePage = () => {
           color="primary"
           onClick={handleLogin}
           disabled={loading}
+          sx={{ mt: 2 }}
         >
           {loading ? "Logging in..." : "Login"}
         </Button>
