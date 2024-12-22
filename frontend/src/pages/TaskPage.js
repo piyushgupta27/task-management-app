@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Container, Typography, Box, Button } from "@mui/material";
+import { Container, Typography, Box, Button, Switch } from "@mui/material";
 import { fetchTasks } from "../services/api/apiClient";
 
 const TaskPage = () => {
@@ -39,6 +39,12 @@ const TaskPage = () => {
     console.log("Delete task:", taskId);
   };
 
+  const handleStatusChange = (taskId) => {
+    setTasks(tasks.map(task =>
+      task.id === taskId ? { ...task, completed: !task.completed } : task
+    ));
+  };
+
   return (
     <Container maxWidth="sm">
       <Typography variant="h4" gutterBottom>
@@ -72,6 +78,12 @@ const TaskPage = () => {
               >
                 Delete
               </Button>
+              <Switch
+                checked={task.completed}
+                onChange={() => handleStatusChange(task.id)}
+                name="statusToggle"
+                inputProps={{ "aria-label": "status toggle" }}
+              />
             </Box>
           </Box>
         ))}
