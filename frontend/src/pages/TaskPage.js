@@ -49,11 +49,29 @@ const TaskPage = () => {
       </Button>
       <Box>
         {tasks.map((task) => (
-          <Box key={task.id}>
+          <Box
+            key={task.id}
+            display="flex"
+            justifyContent="space-between"
+            mb={2}
+          >
             <Typography>{task.title}</Typography>
             <Box>
-              <Button onClick={() => handleEdit(task.id)}>Edit</Button>
-              <Button onClick={() => handleDelete(task.id)}>Delete</Button>
+              <Button
+                variant="outlined"
+                color="primary"
+                onClick={() => handleEdit(task.id)}
+                sx={{ mr: 1 }}
+              >
+                Edit
+              </Button>
+              <Button
+                variant="outlined"
+                color="secondary"
+                onClick={() => handleDelete(task.id)}
+              >
+                Delete
+              </Button>
             </Box>
           </Box>
         ))}
