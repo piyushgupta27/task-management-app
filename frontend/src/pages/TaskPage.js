@@ -8,7 +8,7 @@ import {
   Modal,
   TextField,
 } from "@mui/material";
-import { fetchTasks } from "../services/api/apiClient";
+import { createTask, updateTask, fetchTasks } from "../services/api/apiClient";
 
 const TaskPage = () => {
   const [tasks, setTasks] = useState([]);
@@ -70,11 +70,33 @@ const TaskPage = () => {
     setEditingTask(null);
   };
 
-  const handleSaveTask = () => {
+  const handleSaveTask = async () => {
     if (editingTask) {
-      // Add edit task logic
+      try {
+        await updateTask(editingTask.id, {
+          title: taskTitle,
+          description: taskDescription,
+        });
+        setTasks(
+          tasks.map((task) =>
+            task.id === editingTask.id
+              ? { ...task, title: taskTitle, description: taskDescription }
+              : task
+          )
+        );
+      } catch (err) {
+        setError("Failed to update task");
+      }
     } else {
-      // Add create new task logic
+      try {
+        const newTask = await createTask({
+          title: taskTitle,
+          description: taskDescription,
+        });
+        setTasks([...tasks, newTask]);
+      } catch (err) {
+        setError("Failed to create task");
+      }
     }
     handleModalClose();
   };
@@ -101,7 +123,7 @@ const TaskPage = () => {
             mb={2}
           >
             <Box>
-              <Typography>{task.title}</Typography>
+              <Typography variant="h6">{task.title}</Typography>
               <Typography>{task.description}</Typography>
               <Typography
                 variant="body2"
