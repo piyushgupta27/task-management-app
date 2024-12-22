@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { login } from "../services/api/apiClient";
 import { Container, Typography, TextField, Button, Box, Alert } from "@mui/material";
 
@@ -7,14 +8,21 @@ const HomePage = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const navigate = useNavigate();
 
   const handleLogin = async () => {
     setLoading(true);
     setError(null);
+    setSuccess(false);
 
     try {
       const response = await login(username, password);
       console.log("Login successful:", response);
+      setSuccess(true);
+      setTimeout(() => {
+        navigate("/tasks");
+      }, 2000);
     } catch (err) {
       console.error("Error logging in user:", err);
       setError("Invalid username or password.");
@@ -30,6 +38,9 @@ const HomePage = () => {
           Task Management App
         </Typography>
         {error && <Alert severity="error">{error}</Alert>}
+        {success && (
+          <Alert severity="success">Login successful! Redirecting...</Alert>
+        )}
         <TextField
           fullWidth
           margin="normal"
