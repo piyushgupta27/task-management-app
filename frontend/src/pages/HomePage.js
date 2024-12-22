@@ -1,38 +1,48 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { login } from "../services/api/apiClient";
+import { Container, Typography, TextField, Button, Box } from "@mui/material";
 
 const HomePage = () => {
-  // Example usage: login and fetch tasks
   const username = "john_doe";
   const password = "securepassword";
-  const [error, setError] = useState(null); // State to handle errors
-  const [loading, setLoading] = useState(true); // State to handle loading
 
-  useEffect(() => {
-    // Fetch tasks on component mount
-    const loginUser = async () => {
-      try {
-        await login(username, password);
-      } catch (err) {
-        console.error("Error logging in user:", err);
-        setError("Failed to fetch tasks.");
-      } finally {
-        setLoading(false); // End loading state
-      }
-    };
+  const handleLogin = async () => {
+    try {
+      const response = await login(username, password);
+      console.log("Login successful:", response);
+    } catch (err) {
+      console.error("Error logging in user:", err);
+    }
+  };
 
-    loginUser();
-  }, []);
-
-  if (loading) {
-    return <p>Loading tasks...</p>;
-  }
-
-  if (error) {
-    return <p>{error}</p>;
-  }
-
-  return <h2>Welcome to the Task Management App</h2>;
+  return (
+    <Container>
+      <Box>
+        <Typography>Task Management App</Typography>
+        <TextField
+          fullWidth
+          margin="normal"
+          label="Username"
+          variant="outlined"
+        />
+        <TextField
+          fullWidth
+          margin="normal"
+          label="Password"
+          type="password"
+          variant="outlined"
+        />
+        <Button
+          fullWidth
+          variant="contained"
+          color="primary"
+          onClick={handleLogin}
+        >
+          Login
+        </Button>
+      </Box>
+    </Container>
+  );
 };
 
 export default HomePage;
