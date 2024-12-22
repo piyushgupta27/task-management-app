@@ -31,6 +31,14 @@ const TaskPage = () => {
     return <p>{error}</p>;
   }
 
+  const handleEdit = (taskId) => {
+    console.log("Edit task:", taskId);
+  };
+
+  const handleDelete = (taskId) => {
+    console.log("Delete task:", taskId);
+  };
+
   return (
     <Container maxWidth="sm">
       <Typography variant="h4" gutterBottom>
@@ -41,7 +49,13 @@ const TaskPage = () => {
       </Button>
       <Box>
         {tasks.map((task) => (
-          <Typography key={task.id}>{task.title}</Typography>
+          <Box key={task.id}>
+            <Typography>{task.title}</Typography>
+            <Box>
+              <Button onClick={() => handleEdit(task.id)}>Edit</Button>
+              <Button onClick={() => handleDelete(task.id)}>Delete</Button>
+            </Box>
+          </Box>
         ))}
       </Box>
     </Container>
