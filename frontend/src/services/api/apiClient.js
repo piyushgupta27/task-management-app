@@ -1,48 +1,41 @@
 import axios from "axios";
 
-// API endpoint for login
-const BASE_API_URL = 'http://localhost:8000/api/'; // Replace with your actual login API
-const LOGIN_API_URL = BASE_API_URL + 'token/'; // Replace with your actual login API
-const API_URL_VERSION = 'v1/'
-const FETCH_TASKS_API_URL = BASE_API_URL + API_URL_VERSION + 'tasks/'
+const BASE_API_URL = "http://localhost:8000/api/";
+const LOGIN_API_URL = BASE_API_URL + "token/";
+const API_URL_VERSION = "v1/";
+const TASKS_API_URL = BASE_API_URL + API_URL_VERSION + "tasks/";
 
 // Function to login and fetch the token
 export const login = async (username, password) => {
   try {
     const response = await axios.post(LOGIN_API_URL, {
       username,
-      password
+      password,
     });
 
-    // Assuming the token is returned in response.data.token
     const access_token = response.data.access;
     const refresh_token = response.data.access;
 
-    // Store the token in localStorage for later use
-    localStorage.setItem('access_token', access_token);
-    localStorage.setItem('refresh_token', refresh_token);
+    localStorage.setItem("access_token", access_token);
+    localStorage.setItem("refresh_token", refresh_token);
 
-    console.log('Login successful! Token stored.');
-    return (access_token, refresh_token);
+    console.log("Login successful! Token stored.");
+    return access_token, refresh_token;
   } catch (error) {
-    console.error('Error logging in:', error);
+    console.error("Error logging in:", error);
     throw error;
   }
 };
 
-// Set up Axios instance (API client) to include JWT token in all requests
 const apiClient = axios.create({
-  baseURL: BASE_API_URL + API_URL_VERSION, // Base URL for your API
+  baseURL: BASE_API_URL + API_URL_VERSION,
 });
 
-// Add the Authorization header for each request using an Axios request interceptor
 apiClient.interceptors.request.use(
   (config) => {
-    // Get the token from localStorage
-    // If a token exists, add it to the Authorization header
-    const token = localStorage.getItem('access_token');
+    const token = localStorage.getItem("access_token");
     if (token) {
-      config.headers['Authorization'] = `Bearer ${token}`;
+      config.headers["Authorization"] = `Bearer ${token}`;
     }
 
     return config;
@@ -52,13 +45,54 @@ apiClient.interceptors.request.use(
   }
 );
 
-// Function to fetch tasks using the API client with the JWT token
+// Function to create tasks
+export const createTask = async (title, description) => {
+  try {
+    const response = await axios.post(TASKS_API_URL, { title, description });
+    return response.data;
+  } catch (error) {
+    console.error("Error creating task:", error);
+  }
+};
+
+// Function to fetch tasks
 export const fetchTasks = async () => {
   try {
-    const response = await apiClient.get(FETCH_TASKS_API_URL);
-    return response.data
+    const response = await apiClient.get(TASKS_API_URL);
+    return response.data;
   } catch (error) {
-    console.error('Error fetching tasks:', error);
+    console.error("Error fetching tasks:", error);
+  }
+};
+
+// Function to update a task
+export const updateTask = async (taskId, updatedData) => {
+  try {
+    const response = await axios.put(`${TASKS_API_URL}${taskId}/`, updatedData);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating task:", error);
+  }
+};
+
+// Function to delete a task
+export const deleteTask = async (taskId) => {
+  try {
+    await axios.delete(`${TASKS_API_URL}${taskId}/`);
+  } catch (error) {
+    console.error("Error deleting task:", error);
+  }
+};
+
+// Function to mark a task completed
+export const markTaskCompleted = async (taskId) => {
+  try {
+    const response = await axios.post(
+      `${TASKS_API_URL}${taskId}/mark-completed/`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting task:", error);
   }
 };
 
