@@ -337,7 +337,8 @@ Use the Postman Collection provided in the repository for API testing:
 - Run the following command to execute tests:
 
 > ```bash
-> python manage.py test
+> cd backend
+> pytest --cov=tasks --cov-report=html
 > ```
 
 ### Frontend Testing
