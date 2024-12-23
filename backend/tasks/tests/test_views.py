@@ -12,7 +12,12 @@ def test_create_task():
     client = APIClient()
     client.force_authenticate(user=user)
     url = reverse("task-list")
-    data = {"title": "New Task", "description": "Task Description"}
+    data = {
+        "title": "New Task",
+        "description": "Task Description",
+        "created_by": user,
+        "updated_by": user,
+    }
     response = client.post(url, data)
     assert response.status_code == status.HTTP_201_CREATED
     assert response.data["title"] == "New Task"
@@ -20,20 +25,19 @@ def test_create_task():
 
 
 @pytest.mark.django_db
-def test_list_tasks():
+def test_create_task_without_title():
     user = User.objects.create_user(username="testuser", password="testpassword")
-    Task.objects.create(
-        title="Task 1", description="Description 1", created_by=user, updated_by=user
-    )
-    Task.objects.create(
-        title="Task 2", description="Description 2", created_by=user, updated_by=user
-    )
     client = APIClient()
     client.force_authenticate(user=user)
     url = reverse("task-list")
-    response = client.get(url)
-    assert response.status_code == status.HTTP_200_OK
-    assert len(response.data) == 2
+    data = {
+        "description": "Task without title",
+        "created_by": user,
+        "updated_by": user,
+    }
+    response = client.post(url, data)
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "title" in response.data
 
 
 @pytest.mark.django_db
@@ -49,3 +53,17 @@ def test_mark_task_completed():
     assert response.status_code == status.HTTP_200_OK
     task.refresh_from_db()
     assert task.completed
+
+
+@pytest.mark.django_db
+def test_retrieve_task():
+    user = User.objects.create_user(username="testuser", password="testpassword")
+    task = Task.objects.create(
+        title="Task 1", description="Description 1", created_by=user, updated_by=user
+    )
+    client = APIClient()
+    client.force_authenticate(user=user)
+    url = reverse("task-detail", args=[task.id])
+    response = client.get(url)
+    assert response.status_code == status.HTTP_200_OK
+    assert response.data["title"] == "Task 1"
