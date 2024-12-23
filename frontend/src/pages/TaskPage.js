@@ -8,7 +8,13 @@ import {
   Modal,
   TextField,
 } from "@mui/material";
-import { createTask, updateTask, fetchTasks } from "../services/api/apiClient";
+import {
+  createTask,
+  updateTask,
+  fetchTasks,
+  deleteTask,
+  markTaskCompleted,
+} from "../services/api/apiClient";
 
 const TaskPage = () => {
   const [tasks, setTasks] = useState([]);
@@ -51,16 +57,21 @@ const TaskPage = () => {
     setOpenModal(true);
   };
 
-  const handleDelete = (taskId) => {
-    console.log("Delete task:", taskId);
+  const handleDelete = async (taskId) => {
+    await deleteTask(taskId);
+    setTasks(tasks.filter((task) => task.id !== taskId));
   };
 
-  const handleStatusChange = (taskId) => {
-    setTasks(
-      tasks.map((task) =>
-        task.id === taskId ? { ...task, completed: !task.completed } : task
-      )
-    );
+  const handleStatusChange = async (taskId) => {
+    const task = tasks.find((task) => task.id === taskId);
+    if (!task.completed) {
+      await markTaskCompleted(taskId);
+      setTasks(
+        tasks.map((task) =>
+          task.id === taskId ? { ...task, completed: !task.completed } : task
+        )
+      );
+    }
   };
 
   const handleModalClose = () => {
@@ -153,6 +164,7 @@ const TaskPage = () => {
                 onChange={() => handleStatusChange(task.id)}
                 name="statusToggle"
                 inputProps={{ "aria-label": "status toggle" }}
+                disabled={task.completed}
               />
             </Box>
           </Box>
