@@ -4,10 +4,18 @@ import {
   Typography,
   Box,
   Button,
+  IconButton,
   Switch,
   Modal,
   TextField,
+  Card,
+  CardContent,
+  CardActions,
+  Snackbar,
+  Alert,
 } from "@mui/material";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 import {
   createTask,
   updateTask,
@@ -19,11 +27,13 @@ import {
 const TaskPage = () => {
   const [tasks, setTasks] = useState([]);
   const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
   const [loading, setLoading] = useState(true);
   const [openModal, setOpenModal] = useState(false);
   const [taskTitle, setTaskTitle] = useState("");
   const [taskDescription, setTaskDescription] = useState("");
   const [editingTask, setEditingTask] = useState(null);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   useEffect(() => {
     const getTasks = async () => {
@@ -31,8 +41,8 @@ const TaskPage = () => {
         const taskData = await fetchTasks();
         setTasks(taskData);
       } catch (err) {
-        console.error("Error fetching tasks:", err);
         setError("Failed to fetch tasks.");
+        setSnackbarOpen(true);
       } finally {
         setLoading(false);
       }
@@ -41,12 +51,14 @@ const TaskPage = () => {
     getTasks();
   }, []);
 
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
+    setError(null);
+    setSuccessMessage(null);
+  };
+
   if (loading) {
     return <p>Loading tasks...</p>;
-  }
-
-  if (error) {
-    return <p>{error}</p>;
   }
 
   const handleEdit = (taskId) => {
@@ -58,19 +70,33 @@ const TaskPage = () => {
   };
 
   const handleDelete = async (taskId) => {
-    await deleteTask(taskId);
-    setTasks(tasks.filter((task) => task.id !== taskId));
+    try {
+      await deleteTask(taskId);
+      setTasks(tasks.filter((task) => task.id !== taskId));
+      setSuccessMessage("Task deleted successfully.");
+      setSnackbarOpen(true);
+    } catch (err) {
+      setError("Failed to delete the task");
+      setSnackbarOpen(true);
+    }
   };
 
   const handleStatusChange = async (taskId) => {
     const task = tasks.find((task) => task.id === taskId);
     if (!task.completed) {
-      await markTaskCompleted(taskId);
-      setTasks(
-        tasks.map((task) =>
-          task.id === taskId ? { ...task, completed: !task.completed } : task
-        )
-      );
+      try {
+        await markTaskCompleted(taskId);
+        setTasks(
+          tasks.map((task) =>
+            task.id === taskId ? { ...task, completed: !task.completed } : task
+          )
+        );
+        setSuccessMessage("Task marked completed successfully.");
+        setSnackbarOpen(true);
+      } catch (err) {
+        setError("Failed to mark the task completed");
+        setSnackbarOpen(true);
+      }
     }
   };
 
@@ -95,18 +121,21 @@ const TaskPage = () => {
               : task
           )
         );
+        setSuccessMessage("Task updated successfully.");
+        setSnackbarOpen(true);
       } catch (err) {
         setError("Failed to update task");
+        setSnackbarOpen(true);
       }
     } else {
       try {
-        const newTask = await createTask({
-          title: taskTitle,
-          description: taskDescription,
-        });
+        const newTask = await createTask(taskTitle, taskDescription);
         setTasks([...tasks, newTask]);
+        setSuccessMessage("Task updated successfully.");
+        setSnackbarOpen(true);
       } catch (err) {
         setError("Failed to create task");
+        setSnackbarOpen(true);
       }
     }
     handleModalClose();
@@ -114,26 +143,34 @@ const TaskPage = () => {
 
   return (
     <Container maxWidth="sm">
-      <Typography variant="h4" gutterBottom>
-        Task List
-      </Typography>
-      <Button
-        variant="contained"
-        color="primary"
-        sx={{ mb: 2 }}
-        onClick={() => setOpenModal(true)}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "16px",
+          padding: "16px",
+        }}
       >
-        Add Task
-      </Button>
+        <Typography variant="h4">Task List</Typography>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => setOpenModal(true)}
+        >
+          Add Task
+        </Button>
+      </Box>
       <Box>
         {tasks.map((task) => (
-          <Box
+          <Card
             key={task.id}
-            display="flex"
-            justifyContent="space-between"
-            mb={2}
+            sx={{
+              mb: 2,
+              border: task.completed ? "1px solid green" : "1px solid red",
+            }}
           >
-            <Box>
+            <CardContent>
               <Typography variant="h6">{task.title}</Typography>
               <Typography>{task.description}</Typography>
               <Typography
@@ -142,23 +179,23 @@ const TaskPage = () => {
               >
                 {task.completed ? "Completed" : "Pending"}
               </Typography>
-            </Box>
-            <Box>
-              <Button
+            </CardContent>
+            <CardActions>
+              <IconButton
                 variant="outlined"
                 color="primary"
                 onClick={() => handleEdit(task.id)}
                 sx={{ mr: 1 }}
               >
-                Edit
-              </Button>
-              <Button
+                <EditIcon />
+              </IconButton>
+              <IconButton
                 variant="outlined"
                 color="secondary"
                 onClick={() => handleDelete(task.id)}
               >
-                Delete
-              </Button>
+                <DeleteIcon />
+              </IconButton>
               <Switch
                 checked={task.completed}
                 onChange={() => handleStatusChange(task.id)}
@@ -166,8 +203,8 @@ const TaskPage = () => {
                 inputProps={{ "aria-label": "status toggle" }}
                 disabled={task.completed}
               />
-            </Box>
-          </Box>
+            </CardActions>
+          </Card>
         ))}
       </Box>
       <Modal open={openModal} onClose={handleModalClose}>
@@ -194,6 +231,20 @@ const TaskPage = () => {
           </Button>
         </Box>
       </Modal>
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={error ? "error" : "success"}
+          sx={{ width: "100%" }}
+        >
+          {error || successMessage}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 };

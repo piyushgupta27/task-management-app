@@ -48,10 +48,11 @@ apiClient.interceptors.request.use(
 // Function to create tasks
 export const createTask = async (title, description) => {
   try {
-    const response = await axios.post(TASKS_API_URL, { title, description });
+    const response = await apiClient.post(TASKS_API_URL, { title, description });
     return response.data;
   } catch (error) {
     console.error("Error creating task:", error);
+    throw error
   }
 };
 
@@ -62,37 +63,41 @@ export const fetchTasks = async () => {
     return response.data;
   } catch (error) {
     console.error("Error fetching tasks:", error);
+    throw error
   }
 };
 
 // Function to update a task
 export const updateTask = async (taskId, updatedData) => {
   try {
-    const response = await axios.put(`${TASKS_API_URL}${taskId}/`, updatedData);
+    const response = await apiClient.put(`${TASKS_API_URL}${taskId}/`, updatedData);
     return response.data;
   } catch (error) {
     console.error("Error updating task:", error);
+    throw error
   }
 };
 
 // Function to delete a task
 export const deleteTask = async (taskId) => {
   try {
-    await axios.delete(`${TASKS_API_URL}${taskId}/`);
+    await apiClient.delete(`${TASKS_API_URL}${taskId}/`);
   } catch (error) {
     console.error("Error deleting task:", error);
+    throw error
   }
 };
 
 // Function to mark a task completed
 export const markTaskCompleted = async (taskId) => {
   try {
-    const response = await axios.post(
+    const response = await apiClient.patch(
       `${TASKS_API_URL}${taskId}/mark-completed/`
     );
     return response.data;
   } catch (error) {
     console.error("Error deleting task:", error);
+    throw error
   }
 };
 
